@@ -1,0 +1,55 @@
+version: "3.7"
+services:
+    app:
+        build:
+            args:
+                user: app
+                uid: 1000
+            context: ./
+            dockerfile: Dockerfile
+        image: smart-php
+        container_name: smart-php
+        restart: unless-stopped
+        working_dir: /var/www/
+        volumes:
+            - ./:/var/www
+        networks:
+            smart-net:
+                ipv4_address: 172.10.2.13
+
+    mysql:
+        image: mysql:8.0
+        container_name: smart-mysql
+        restart: unless-stopped
+        command: --default-authentication-plugin=mysql_native_password
+        environment:
+            MYSQL_DATABASE: smw_api
+            MYSQL_ROOT_PASSWORD: gh69_Tcxx3PN
+            MYSQL_PASSWORD: c34sm_wdDZ1
+            MYSQL_USER: admin
+        volumes:
+            - ./.storage/mysql:/var/lib/mysql
+        networks:
+            smart-net:
+                ipv4_address: 172.10.2.12
+
+    nginx:
+        image: nginx:alpine
+        container_name: smart-nginx
+        restart: unless-stopped
+        ports:
+            - 80:80
+        volumes:
+            - ./:/var/www
+            - ./.docker/nginx/:/etc/nginx/conf.d/
+        networks:
+            smart-net:
+                ipv4_address: 172.10.2.11
+
+networks:
+    smart-net:
+        driver: bridge
+        ipam:
+            driver: default
+            config:
+                - subnet: 172.10.2.0/23
